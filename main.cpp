@@ -24,7 +24,8 @@ int loadFile(string name, char **mem) {
 }
 
 void draw(void);
-void key(unsigned char, int, int);
+void keyPressed(unsigned char, int, int);
+void keyUp(unsigned char, int, int);
 
 char *screen;
 int width, height;
@@ -67,9 +68,9 @@ int main(int argc, char **argv) {
     }
 
     // print ROM file
-    for (int i = 0; i < size; i+=2) {
-        printf("0x%.2X\t0x%.2X\n", mem[i], mem[i+1]);
-    }
+    // for (int i = 0; i < size; i+=2) {
+    //     printf("0x%.2X\t0x%.2X\n", mem[i], mem[i+1]);
+    // }
 
     // load ROM
     chip8 = new CHIP8();
@@ -98,7 +99,8 @@ int main(int argc, char **argv) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glutDisplayFunc(draw);
-    glutKeyboardFunc(key);
+    glutKeyboardFunc(keyPressed);
+    glutKeyboardUpFunc(keyUp);
 
     thread t1(chip8executor);
 
@@ -132,6 +134,14 @@ void draw(void) {
     glutPostRedisplay();
 }
 
-void key(unsigned char k, int x, int y) {
-    cout << "unhandled key " << k << endl;
+void keyPressed(unsigned char k, int x, int y) {
+    displayBufferMutex.lock();
+    chip8->keyPressed(k);
+    displayBufferMutex.unlock();
+}
+
+void keyUp(unsigned char k, int x, int y) {
+    displayBufferMutex.lock();
+    chip8->keyUp(k);
+    displayBufferMutex.unlock();
 }
